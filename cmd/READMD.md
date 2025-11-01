@@ -1,0 +1,3 @@
+# cmd
+
+should have initiate a the project with cobra instead...
