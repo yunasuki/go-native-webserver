@@ -27,8 +27,35 @@ func (s *Server) RegisterRoutes() http.Handler {
 	apiMux := http.NewServeMux()
 	// Instantiate controller
 	controller := controllers.NewAllInOneController() // this line is also a possible DI...
-	apiMux.Handle("POST /subscriptions", http.HandlerFunc(controller.PostSubscription))
-	apiMux.Handle("GET /public-holidays", http.HandlerFunc(controller.GetPublicHoliday))
+	// ugh i am not familiar with mux package enough to do method chain routing
+	apiMux.Handle("/subscriptions", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "POST":
+			controller.PostSubscription(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		return
+	}))
+	apiMux.Handle("/public-holidays", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			controller.GetPublicHoliday(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+	}))
+	apiMux.Handle("/shipping-event", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "PUT":
+			controller.PutShippingEvent(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+	}))
 	rootMux.Handle("/api/", http.StripPrefix("/api", s.headerValidationMiddleware(s.authMiddleware(apiMux)))) // DRY like this?
 
 	// Wrap the mux with config reload, recovery, and CORS middleware

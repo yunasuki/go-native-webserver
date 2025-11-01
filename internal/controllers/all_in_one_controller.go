@@ -9,6 +9,7 @@ import (
 type AllInOneController interface {
 	PostSubscription(w http.ResponseWriter, r *http.Request)
 	GetPublicHoliday(w http.ResponseWriter, r *http.Request)
+	PutShippingEvent(w http.ResponseWriter, r *http.Request)
 }
 
 type allInOneController struct {
@@ -32,6 +33,13 @@ func (c *allInOneController) PostSubscription(w http.ResponseWriter, r *http.Req
 		return
 	}
 	ResponseSuccessJSON(w, http.StatusAccepted, map[string]string{"status": "subscribed"})
+}
+
+// ugh, there is hidden api need to make the logic
+func (c *allInOneController) PutShippingEvent(w http.ResponseWriter, r *http.Request) {
+	// Implement the logic for updating a shipping event.
+	w.WriteHeader(http.StatusNotImplemented)
+	w.Write([]byte("PutShippingEvent not implemented"))
 }
 
 func (c *allInOneController) GetPublicHoliday(w http.ResponseWriter, r *http.Request) {

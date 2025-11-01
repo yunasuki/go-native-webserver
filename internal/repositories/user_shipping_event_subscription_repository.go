@@ -1,25 +1,34 @@
 package repositories
 
+import (
+	"go-native-webserver/internal/dal"
+	"go-native-webserver/internal/model"
+)
+
 type UserShippingEventSubscriptionRepository interface {
 	// Define methods for managing user shipping event subscriptions
-	CreateSubscription(userID int64, shippingEventID int64) error
+	CreateSubscription(userID int64, shippingEventID int64) (*model.UserShippingEventSubscription, error)
 	DeleteSubscription(subscriptionID int64) error
 	GetSubscriptionsByEventID(eventID int64) ([]int64, error) // returns list of UserIDs
 }
 
 type userShippingEventSubscriptionRepo struct {
-	// Add necessary fields like DB connection
+	db dal.DatabaseConnection
 }
 
 func NewUserShippingEventSubscriptionRepository() UserShippingEventSubscriptionRepository {
 	return &userShippingEventSubscriptionRepo{
-		// Initialize fields
+		db: dal.GetDB(),
 	}
 }
 
-func (repo *userShippingEventSubscriptionRepo) CreateSubscription(userID int64, shippingEventID int64) error {
-	// Implement the logic to create a new subscription
-	return nil
+func (repo *userShippingEventSubscriptionRepo) CreateSubscription(userID int64, shippingEventID int64) (*model.UserShippingEventSubscription, error) {
+	newRecord := &model.UserShippingEventSubscription{
+		UserID:          userID,
+		ShippingEventID: shippingEventID,
+	}
+	repo.db.Model(&model.UserShippingEventSubscription{}).Where("user_id = ? AND shipping_event_id = ? ", userID, shippingEventID).FirstOrCreate(newRecord)
+	return newRecord, nil
 }
 
 func (repo *userShippingEventSubscriptionRepo) DeleteSubscription(subscriptionID int64) error {

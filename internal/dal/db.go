@@ -8,7 +8,11 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB // sql.DB, gorm.DB, depends on ORM choice...
+type DatabaseConnection = *gorm.DB // could be sql.DB if using database/sql, mysql...Driver, postgresDriver, etc.
+
+var DB DatabaseConnection
+
+var ErrRecordNotFound error = gorm.ErrRecordNotFound // abstract gorm error, could be sql.ErrNoRows if using database/sql
 
 func InitDB() error {
 	c := config.GetServerConfig() // load config if needed

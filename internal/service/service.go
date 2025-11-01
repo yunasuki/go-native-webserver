@@ -1,3 +1,4 @@
 package service
 
-type BaseService struct{}
+type BaseService struct {
+}
