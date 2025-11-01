@@ -39,6 +39,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	done <- true
 }
 
+// fml need to rewrite using cobra... messy af
 func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
@@ -51,6 +52,15 @@ func main() {
 		case "start-queue-worker":
 			// Implement queue worker start logic here
 			log.Println("Starting queue worker...")
+			return
+		case "queue": // process a specific job (retry failed job)
+			jobIDStr := os.Args[2]
+			if jobIDStr == "" {
+				log.Fatalf("Job ID must be provided for 'queue' command")
+			}
+			// Implement queue job processing logic here
+			log.Printf("Processing queue job with ID: %s", jobIDStr)
+
 			return
 		default:
 			log.Fatalf("Unknown command: %s", os.Args[1])

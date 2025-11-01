@@ -12,6 +12,17 @@ type ServerConfig struct {
 	ReadTimeoutSeconds  int
 	WriteTimeoutSeconds int
 	QueueWorkMaxCount   int
+
+	Database ServerDatabaseConfig
+}
+
+type ServerDatabaseConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Name     string
+	SSLMode  string
 }
 
 var (
@@ -52,11 +63,21 @@ func loadConfig() *ServerConfig {
 	writeTimeout := getEnvAsInt("WRITE_TIMEOUT_SECONDS", 30)
 	queueWorkMaxCount := getEnvAsInt("QUEUE_WORK_MAX_COUNT", 100)
 
+	databaseConfig := ServerDatabaseConfig{
+		Host:     getEnv("DB_HOST", "localhost"),
+		Port:     getEnvAsInt("DB_PORT", 5432),
+		User:     getEnv("DB_USER", "user"),
+		Password: getEnv("DB_PASSWORD", "password"),
+		Name:     getEnv("DB_NAME", "appdb"),
+		SSLMode:  getEnv("DB_SSLMODE", "disable"),
+	}
+
 	return &ServerConfig{
 		AllowedOrigins:      allowedOrigins,
 		ReadTimeoutSeconds:  readTimeout,
 		WriteTimeoutSeconds: writeTimeout,
 		QueueWorkMaxCount:   queueWorkMaxCount,
+		Database:            databaseConfig,
 	}
 }
 

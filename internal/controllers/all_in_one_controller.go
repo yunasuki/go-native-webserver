@@ -26,9 +26,12 @@ func (c *allInOneController) PostLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *allInOneController) PostSubscription(w http.ResponseWriter, r *http.Request) {
-	c.shippingEventService.AddUserToShippingEventSubscription(context.Background(), 1, 1)
-	w.WriteHeader(http.StatusNotImplemented)
-	w.Write([]byte("PostSubscription not implemented"))
+	err := c.shippingEventService.AddUserToShippingEventSubscription(context.Background(), 1, 1)
+	if err != nil {
+		ResponseError(w, err)
+		return
+	}
+	ResponseSuccessJSON(w, http.StatusAccepted, map[string]string{"status": "subscribed"})
 }
 
 func (c *allInOneController) GetPublicHoliday(w http.ResponseWriter, r *http.Request) {

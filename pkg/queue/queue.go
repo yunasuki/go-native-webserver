@@ -2,12 +2,20 @@ package queue
 
 import (
 	"context"
+	"fmt"
+	"go-native-webserver/pkg/logger"
 	"sync"
 )
 
+type JobRecordModel struct {
+	ID         int    // database ID & the parameter to retry the job
+	JobName    string // key to find the specific job processor
+	JobPayload string // json string of job payload
+}
+
 // Job represents a unit of work to be processed by the worker pool.
 type Job interface {
-	Process(ctx context.Context)
+	Process(ctx context.Context) error
 }
 
 // Queue manages job distribution to a pool of workers.
@@ -48,7 +56,10 @@ func (q *Queue) worker() {
 		select {
 		case job := <-q.jobs:
 			if job != nil {
-				job.Process(q.ctx)
+				if err := job.Process(q.ctx); err != nil {
+					// Handle job processing error (e.g., log it)
+					logger.Error(fmt.Sprintf("Job processing error: %v", err))
+				}
 			}
 		case <-q.ctx.Done():
 			return

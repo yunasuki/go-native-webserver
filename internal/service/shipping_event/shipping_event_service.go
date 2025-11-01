@@ -34,7 +34,6 @@ func (s *shippingEventService) AddUserToShippingEventSubscription(ctx context.Co
 type MockShippingEventService struct{}
 
 func (m *MockShippingEventService) UpdateShippingEvent(ctx context.Context, eventID int64, status string) error {
-	// Mock implementation
 	return nil
 }
 

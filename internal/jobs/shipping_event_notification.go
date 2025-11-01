@@ -1,6 +1,12 @@
 package jobs
 
-import "time"
+import (
+	"context"
+	"go-native-webserver/pkg/queue"
+	"time"
+)
+
+var _ queue.Job = (*ShippingEventNotificationJob)(nil)
 
 type ShippingEventNotificationJob struct {
 	// Define fields relevant to the shipping event notification job
@@ -10,7 +16,7 @@ type ShippingEventNotificationJob struct {
 	Status       string
 }
 
-func (job *ShippingEventNotificationJob) Process() error {
+func (job *ShippingEventNotificationJob) Process(ctx context.Context) error {
 
 	return nil
 }
