@@ -39,7 +39,9 @@ func (r *shippingEventRepository) Create(ctx context.Context, event *model.Shipp
 }
 
 func (r *shippingEventRepository) Update(ctx context.Context, event *model.ShippingEvent) error {
-	// Implement the logic to update an existing shipping event in the database
+	if err := r.db.Where("id = ? ", event.ID).Updates(event).Error; err != nil {
+		return err
+	}
 	return nil
 }
 

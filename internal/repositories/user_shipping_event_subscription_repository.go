@@ -8,8 +8,7 @@ import (
 type UserShippingEventSubscriptionRepository interface {
 	// Define methods for managing user shipping event subscriptions
 	CreateSubscription(userID int64, shippingEventID int64) (*model.UserShippingEventSubscription, error)
-	DeleteSubscription(subscriptionID int64) error
-	GetSubscriptionsByEventID(eventID int64) ([]int64, error) // returns list of UserIDs
+	ListByShippingEventID(eventID int64) ([]model.UserShippingEventSubscription, error)
 }
 
 type userShippingEventSubscriptionRepo struct {
@@ -31,12 +30,11 @@ func (repo *userShippingEventSubscriptionRepo) CreateSubscription(userID int64, 
 	return newRecord, nil
 }
 
-func (repo *userShippingEventSubscriptionRepo) DeleteSubscription(subscriptionID int64) error {
-	// Implement the logic to delete a subscription
-	return nil
-}
-
-func (repo *userShippingEventSubscriptionRepo) GetSubscriptionsByEventID(eventID int64) ([]int64, error) {
-	// Implement the logic to get user IDs subscribed to a specific shipping event
-	return []int64{}, nil
+func (repo *userShippingEventSubscriptionRepo) ListByShippingEventID(eventID int64) ([]model.UserShippingEventSubscription, error) {
+	var subscriptions []model.UserShippingEventSubscription
+	err := repo.db.Model(&model.UserShippingEventSubscription{}).Where("shipping_event_id = ?", eventID).Find(&subscriptions).Error
+	if err != nil {
+		return nil, err
+	}
+	return subscriptions, nil
 }

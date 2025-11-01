@@ -3,8 +3,11 @@ package shippingevent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go-native-webserver/internal/apperror"
 	"go-native-webserver/internal/dal"
+	"go-native-webserver/internal/jobs"
+	"go-native-webserver/internal/model"
 	"go-native-webserver/internal/repositories"
 	"go-native-webserver/internal/service"
 )
@@ -33,6 +36,43 @@ func NewShippingEventService() *shippingEventService {
 
 func (s *shippingEventService) UpdateShippingEvent(ctx context.Context, eventID int64, status string) error {
 	// Implement update logic here
+	// 1. Update the shipping event
+	expectedRecord := &model.ShippingEvent{
+		ID:     eventID,
+		Status: status,
+	}
+	err := s.shippingEventRepo.Update(ctx, expectedRecord)
+	if err != nil {
+		return apperror.APIError{
+			Code:    500,
+			Message: "Failed to update shipping event",
+		}
+	}
+
+	// 2. Notify subscribed users (omitted for brevity)
+	subscriptions, err := s.userShippingEventSubscription.ListByShippingEventID(eventID)
+	if err != nil {
+		if errors.Is(err, dal.ErrRecordNotFound) {
+			return nil // no subscribers, nothing to do
+		}
+		return apperror.APIError{
+			Code:    500,
+			Message: "Internal Error - Failed to retrieve subscriptions",
+		}
+	}
+	var userIDs []int64
+	for _, sub := range subscriptions {
+		userIDs = append(userIDs, sub.UserID)
+	}
+	newJob := &jobs.ShippingEventNotificationJob{
+		EventID:   eventID,
+		NewStatus: status,
+		UserIDs:   userIDs,
+	}
+
+	// Push to database job records, let queue worker pick it up later
+	fmt.Printf("Debug: Created job: %+v\n", newJob)
+
 	return nil
 }
 
@@ -84,11 +124,11 @@ func (s *shippingEventService) AddUserToShippingEventSubscription(ctx context.Co
 
 type MockShippingEventService struct{}
 
-func (m *MockShippingEventService) UpdateShippingEvent(ctx context.Context, eventID int64, status string) error {
+func (s *MockShippingEventService) UpdateShippingEvent(ctx context.Context, eventID int64, status string) error {
 	return nil
 }
 
-func (m *MockShippingEventService) AddUserToShippingEventSubscription(ctx context.Context, eventID int64, userID int64) error {
+func (s *MockShippingEventService) AddUserToShippingEventSubscription(ctx context.Context, eventID int64, userID int64) error {
 	// Mock implementation
 	return nil
 }
