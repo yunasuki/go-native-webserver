@@ -106,10 +106,13 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 // configReloadMiddleware triggers hot reload of app configuration if X-Reload-Config header is present.
 func (s *Server) configReloadMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// kinda weird to reload on every request,
-		// should have been a api or command to reload the config
-		// i guess you are wanting config per request?
+		// kinda weird to reload on every request, should have been a api or command to trigger reload the config
 		config.ReloadServerConfig()
+
+		// or not reloading but middleware for config as context?
+		// ctx := context.WithValue(r.Context(), "config", config.GetServerConfig())
+		// r = r.WithContext(ctx)
+
 		next.ServeHTTP(w, r)
 	})
 }
